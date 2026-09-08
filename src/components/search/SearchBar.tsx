@@ -4,9 +4,10 @@ import { useState } from "react";
 
 type SearchBarProps = {
   onSearch: (query: string) => void;
+  onQueryChange: (query: string) => void;
 };
 
-export default function SearchBar({ onSearch }: SearchBarProps) {
+export default function SearchBar({ onSearch, onQueryChange }: SearchBarProps) {
   const [query, setQuery] = useState("");
 
   function handleSubmit(event: React.SyntheticEvent<HTMLFormElement>) {
@@ -28,7 +29,12 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
         id="search"
         type="search"
         value={query}
-        onChange={(event) => setQuery(event.target.value)}
+        onChange={(event) => {
+          const value = event.target.value;
+
+          setQuery(value);
+          onQueryChange(value);
+        }}
         placeholder="Search..."
         className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200"
       />

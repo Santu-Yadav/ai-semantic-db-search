@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import SearchBar from "@/components/search/SearchBar";
 import SearchResults from "@/components/search/SearchResults";
 import { searchData } from "@/data/search-data";
 import { SearchItem } from "@/types/search";
+import RecentSearches from "@/components/search/RecentSearches";
+import SearchSuggestions from "@/components/search/SearchSuggestions";
 
 export default function Home() {
   const [results, setResults] = useState<SearchItem[]>([]);
   const [query, setQuery] = useState("");
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<SearchItem[]>([]);
 
   function handleSearch(searchQuery: string) {
     const normalizedQuery = searchQuery.toLowerCase();
@@ -24,15 +28,64 @@ export default function Home() {
 
     setQuery(searchQuery);
     setResults(filteredResults);
+
+    setRecentSearches((previousSearches) => {
+      const updatedSearches = [
+        searchQuery,
+        ...previousSearches.filter((search) => search !== searchQuery),
+      ].slice(0, 5);
+
+      localStorage.setItem("recent-searches", JSON.stringify(updatedSearches));
+
+      return updatedSearches;
+    });
   }
+
+  function handleQueryChange(value: string) {
+    if (!value.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    const normalizedQuery = value.toLowerCase();
+
+    const filteredSuggestions = searchData
+      .filter((item) => {
+        return (
+          item.title.toLowerCase().includes(normalizedQuery) ||
+          item.category.toLowerCase().includes(normalizedQuery)
+        );
+      })
+      .slice(0, 5);
+
+    setSuggestions(filteredSuggestions);
+  }
+
+  useEffect(() => {
+    const storedSearches = localStorage.getItem("recent-searches");
+
+    if (storedSearches) {
+      setRecentSearches(JSON.parse(storedSearches));
+    }
+  }, []);
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-12">
       <div className="mx-auto max-w-3xl">
         <h1 className="mb-8 text-3xl font-bold text-gray-900">Search</h1>
 
-        <SearchBar onSearch={handleSearch} />
+        <div className="relative">
+          <SearchBar
+            onSearch={handleSearch}
+            onQueryChange={handleQueryChange}
+          />
 
+          <SearchSuggestions
+            suggestions={suggestions}
+            onSelect={handleSearch}
+          />
+        </div>
+        <RecentSearches searches={recentSearches} onSelect={handleSearch} />
         <SearchResults results={results} query={query} />
       </div>
     </main>
