@@ -2,15 +2,20 @@
 
 import { useState } from "react";
 
-export default function SearchBar() {
+type SearchBarProps = {
+  onSearch: (query: string) => void;
+};
+
+export default function SearchBar({ onSearch }: SearchBarProps) {
   const [query, setQuery] = useState("");
 
   function handleSubmit(event: React.SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!query.trim()) return;
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) return;
 
-    console.log("Searching for:", query);
+    onSearch(trimmedQuery);
   }
 
   return (
