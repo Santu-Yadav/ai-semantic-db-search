@@ -14,6 +14,7 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<SearchItem[]>([]);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
 
   function handleSearch(searchQuery: string) {
     const normalizedQuery = searchQuery.toLowerCase();
@@ -61,6 +62,46 @@ export default function Home() {
     setSuggestions(filteredSuggestions);
   }
 
+  function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter" && activeSuggestionIndex >= 0) {
+      event.preventDefault();
+
+      const selectedSuggestion = suggestions[activeSuggestionIndex];
+
+      handleSearch(selectedSuggestion.title);
+
+      setSuggestions([]);
+      setActiveSuggestionIndex(-1);
+
+      return;
+    }
+
+    if (event.key === "Escape") {
+      setSuggestions([]);
+      setActiveSuggestionIndex(-1);
+
+      return;
+    }
+
+    if (suggestions.length === 0) return;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+
+      setActiveSuggestionIndex((previousIndex) =>
+        previousIndex < suggestions.length - 1 ? previousIndex + 1 : 0,
+      );
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+
+      setActiveSuggestionIndex((previousIndex) =>
+        previousIndex > 0 ? previousIndex - 1 : suggestions.length - 1,
+      );
+    }
+  }
+
   useEffect(() => {
     const storedSearches = localStorage.getItem("recent-searches");
 
@@ -78,10 +119,12 @@ export default function Home() {
           <SearchBar
             onSearch={handleSearch}
             onQueryChange={handleQueryChange}
+            onKeyDown={handleKeyDown}
           />
 
           <SearchSuggestions
             suggestions={suggestions}
+            activeIndex={activeSuggestionIndex}
             onSelect={handleSearch}
           />
         </div>

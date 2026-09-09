@@ -2,11 +2,13 @@ import { SearchItem } from "@/types/search";
 
 type SearchSuggestionsProps = {
   suggestions: SearchItem[];
+  activeIndex: number;
   onSelect: (query: string) => void;
 };
 
 export default function SearchSuggestions({
   suggestions,
+  activeIndex,
   onSelect,
 }: SearchSuggestionsProps) {
   if (suggestions.length === 0) {
@@ -19,12 +21,14 @@ export default function SearchSuggestions({
         Suggestions
       </p>
 
-      {suggestions.map((suggestion) => (
+      {suggestions.map((suggestion, index) => (
         <button
           key={suggestion.id}
           type="button"
           onClick={() => onSelect(suggestion.title)}
-          className="block w-full rounded-md px-3 py-2 text-left hover:bg-gray-100"
+          className={`block w-full rounded-md px-3 py-2 text-left ${
+            index === activeIndex ? "bg-gray-100" : "hover:bg-gray-100"
+          }`}
         >
           <p className="text-sm font-medium text-gray-900">
             {suggestion.title}
