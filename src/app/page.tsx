@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 
 import SearchBar from "@/components/search/SearchBar";
 import SearchResults from "@/components/search/SearchResults";
-import { searchData } from "@/data/search-data";
-import { SearchItem } from "@/types/search";
+import { SearchItem, SearchResponse } from "@/types/search";
 import RecentSearches from "@/components/search/RecentSearches";
 import SearchSuggestions from "@/components/search/SearchSuggestions";
 
@@ -26,7 +25,7 @@ export default function Home() {
         throw new Error("Search request failed");
       }
 
-      const data = await response.json();
+      const data: SearchResponse = await response.json();
 
       setQuery(searchQuery);
       setResults(data.results);
@@ -49,24 +48,30 @@ export default function Home() {
     }
   }
 
-  function handleQueryChange(value: string) {
+  async function handleQueryChange(value: string) {
     if (!value.trim()) {
       setSuggestions([]);
+      setActiveSuggestionIndex(-1);
       return;
     }
 
-    const normalizedQuery = value.toLowerCase();
+    try {
+      const response = await fetch(
+        `/api/search?q=${encodeURIComponent(value)}`,
+      );
 
-    const filteredSuggestions = searchData
-      .filter((item) => {
-        return (
-          item.title.toLowerCase().includes(normalizedQuery) ||
-          item.category.toLowerCase().includes(normalizedQuery)
-        );
-      })
-      .slice(0, 5);
+      if (!response.ok) {
+        throw new Error("Suggestion request failed");
+      }
 
-    setSuggestions(filteredSuggestions);
+      const data: SearchResponse = await response.json();
+
+      setSuggestions(data.suggestions);
+      setActiveSuggestionIndex(-1);
+    } catch (error) {
+      console.error("Failed to fetch suggestions:", error);
+      setSuggestions([]);
+    }
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {

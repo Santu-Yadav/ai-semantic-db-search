@@ -5,7 +5,10 @@ export async function GET(request: Request) {
   const query = searchParams.get("q")?.trim() ?? "";
 
   if (!query) {
-    return Response.json({ results: [] });
+    return Response.json({
+      results: [],
+      suggestions: [],
+    });
   }
 
   const normalizedQuery = query.toLowerCase();
@@ -18,5 +21,17 @@ export async function GET(request: Request) {
     );
   });
 
-  return Response.json({ results });
+  const suggestions = searchData
+    .filter((item) => {
+      return (
+        item.title.toLowerCase().includes(normalizedQuery) ||
+        item.category.toLowerCase().includes(normalizedQuery)
+      );
+    })
+    .slice(0, 5);
+
+  return Response.json({
+    results,
+    suggestions,
+  });
 }

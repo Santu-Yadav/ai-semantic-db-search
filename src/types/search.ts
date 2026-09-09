@@ -4,3 +4,8 @@ export type SearchItem = {
   description: string;
   category: string;
 };
+
+export type SearchResponse = {
+  results: SearchItem[];
+  suggestions: SearchItem[];
+};
