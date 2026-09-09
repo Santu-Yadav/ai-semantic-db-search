@@ -16,30 +16,37 @@ export default function Home() {
   const [suggestions, setSuggestions] = useState<SearchItem[]>([]);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
 
-  function handleSearch(searchQuery: string) {
-    const normalizedQuery = searchQuery.toLowerCase();
-
-    const filteredResults = searchData.filter((item) => {
-      return (
-        item.title.toLowerCase().includes(normalizedQuery) ||
-        item.description.toLowerCase().includes(normalizedQuery) ||
-        item.category.toLowerCase().includes(normalizedQuery)
+  async function handleSearch(searchQuery: string) {
+    try {
+      const response = await fetch(
+        `/api/search?q=${encodeURIComponent(searchQuery)}`,
       );
-    });
 
-    setQuery(searchQuery);
-    setResults(filteredResults);
+      if (!response.ok) {
+        throw new Error("Search request failed");
+      }
 
-    setRecentSearches((previousSearches) => {
-      const updatedSearches = [
-        searchQuery,
-        ...previousSearches.filter((search) => search !== searchQuery),
-      ].slice(0, 5);
+      const data = await response.json();
 
-      localStorage.setItem("recent-searches", JSON.stringify(updatedSearches));
+      setQuery(searchQuery);
+      setResults(data.results);
 
-      return updatedSearches;
-    });
+      setRecentSearches((previousSearches) => {
+        const updatedSearches = [
+          searchQuery,
+          ...previousSearches.filter((search) => search !== searchQuery),
+        ].slice(0, 5);
+
+        localStorage.setItem(
+          "recent-searches",
+          JSON.stringify(updatedSearches),
+        );
+
+        return updatedSearches;
+      });
+    } catch (error) {
+      console.error("Search failed:", error);
+    }
   }
 
   function handleQueryChange(value: string) {
