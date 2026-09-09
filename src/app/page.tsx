@@ -102,6 +102,11 @@ export default function Home() {
     }
   }
 
+  function handleClear() {
+    setSuggestions([]);
+    setActiveSuggestionIndex(-1);
+  }
+
   useEffect(() => {
     const storedSearches = localStorage.getItem("recent-searches");
 
@@ -119,7 +124,9 @@ export default function Home() {
           <SearchBar
             onSearch={handleSearch}
             onQueryChange={handleQueryChange}
+            hasSuggestions={suggestions.length > 0}
             onKeyDown={handleKeyDown}
+            onClear={handleClear}
           />
 
           <SearchSuggestions

@@ -5,13 +5,17 @@ import { useState } from "react";
 type SearchBarProps = {
   onSearch: (query: string) => void;
   onQueryChange: (query: string) => void;
+  hasSuggestions: boolean;
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  onClear: () => void;
 };
 
 export default function SearchBar({
   onSearch,
   onQueryChange,
+  hasSuggestions,
   onKeyDown,
+  onClear,
 }: SearchBarProps) {
   const [query, setQuery] = useState("");
 
@@ -41,9 +45,23 @@ export default function SearchBar({
           onQueryChange(value);
         }}
         onKeyDown={onKeyDown}
+        role="combobox"
+        aria-expanded={hasSuggestions}
+        aria-controls="search-suggestions"
+        aria-autocomplete="list"
         placeholder="Search..."
         className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200"
       />
+      {query && (
+        <button
+          type="button"
+          onClick={onClear}
+          aria-label="Clear search"
+          className="absolute right-3 top-1/2 -translate-y-1/2"
+        >
+          ×
+        </button>
+      )}
 
       <button
         type="submit"
