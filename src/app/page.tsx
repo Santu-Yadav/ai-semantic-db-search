@@ -8,14 +8,36 @@ import { SearchItem, SearchResponse } from "@/types/search";
 import RecentSearches from "@/components/search/RecentSearches";
 import SearchSuggestions from "@/components/search/SearchSuggestions";
 
+type SearchMode = "traditional" | "ai";
+
 export default function Home() {
   const [results, setResults] = useState<SearchItem[]>([]);
   const [query, setQuery] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<SearchItem[]>([]);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const [searchMode, setSearchMode] = useState<SearchMode>("traditional");
+  const [aiAnswer, setAiAnswer] = useState("");
 
   async function handleSearch(searchQuery: string) {
+    if (searchMode === "ai") {
+      const response = await fetch("/api/ai-search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query: searchQuery }),
+      });
+
+      const data = await response.json();
+
+      console.log("AI Search Response:", data);
+
+      setAiAnswer(data.answer);
+
+      return;
+    }
+
     try {
       const response = await fetch(
         `/api/search?q=${encodeURIComponent(searchQuery)}`,
@@ -129,6 +151,31 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-12">
+      <div className="mb-4 flex gap-2">
+        <button
+          type="button"
+          onClick={() => setSearchMode("traditional")}
+          className={`rounded-md px-4 py-2 ${
+            searchMode === "traditional"
+              ? "bg-black text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+        >
+          Traditional
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setSearchMode("ai")}
+          className={`rounded-md px-4 py-2 ${
+            searchMode === "ai"
+              ? "bg-black text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+        >
+          AI Search
+        </button>
+      </div>
       <div className="mx-auto max-w-3xl">
         <h1 className="mb-8 text-3xl font-bold text-gray-900">Search</h1>
 
@@ -148,7 +195,7 @@ export default function Home() {
           />
         </div>
         <RecentSearches searches={recentSearches} onSelect={handleSearch} />
-        <SearchResults results={results} query={query} />
+        <SearchResults results={results} query={query} aiAnswer={aiAnswer} />
       </div>
     </main>
   );

@@ -1,4 +1,4 @@
-import { searchData } from "@/data/search-data";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -11,27 +11,33 @@ export async function GET(request: Request) {
     });
   }
 
-  const normalizedQuery = query.toLowerCase();
-
-  const results = searchData.filter((item) => {
-    return (
-      item.title.toLowerCase().includes(normalizedQuery) ||
-      item.description.toLowerCase().includes(normalizedQuery) ||
-      item.category.toLowerCase().includes(normalizedQuery)
-    );
+  const results = await prisma.searchItem.findMany({
+    where: {
+      OR: [
+        {
+          title: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+        {
+          description: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+        {
+          category: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+      ],
+    },
   });
-
-  const suggestions = searchData
-    .filter((item) => {
-      return (
-        item.title.toLowerCase().includes(normalizedQuery) ||
-        item.category.toLowerCase().includes(normalizedQuery)
-      );
-    })
-    .slice(0, 5);
 
   return Response.json({
     results,
-    suggestions,
+    suggestions: results,
   });
 }

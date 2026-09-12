@@ -1,11 +1,29 @@
 import { SearchItem } from "@/types/search";
+import ReactMarkdown from "react-markdown";
 
 type SearchResultsProps = {
   results: SearchItem[];
   query: string;
+  aiAnswer: string;
 };
 
-export default function SearchResults({ results, query }: SearchResultsProps) {
+export default function SearchResults({
+  results,
+  query,
+  aiAnswer,
+}: SearchResultsProps) {
+  if (aiAnswer) {
+    return (
+      <section className="mt-8">
+        <p className="mb-4 text-sm text-gray-500">AI answer for "{query}"</p>
+
+        <article className="rounded-lg border border-gray-200 bg-white p-5">
+          {/* <p className="text-sm text-gray-700">{aiAnswer}</p> */}
+          <ReactMarkdown>ReactMarkdown</ReactMarkdown>
+        </article>
+      </section>
+    );
+  }
   if (!query.trim()) {
     return null;
   }
