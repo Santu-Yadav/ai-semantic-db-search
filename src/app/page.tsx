@@ -19,6 +19,28 @@ export default function Home() {
   const [searchMode, setSearchMode] = useState<SearchMode>("traditional");
   const [aiAnswer, setAiAnswer] = useState("");
 
+  async function testEmbedding() {
+    const texts = [
+      "React is a JavaScript library for building user interfaces.",
+      "React helps developers create reusable UI components.",
+      "PostgreSQL is a relational database system.",
+    ];
+
+    const response = await fetch("/api/embedding-test", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ texts }),
+    });
+
+    const data = await response.json();
+
+    console.log("Embedding response:", data);
+    console.log("Number of embeddings:", data.embeddings.length);
+    console.log("Dimensions:", data.embeddings[0].length);
+  }
+
   async function handleSearch(searchQuery: string) {
     if (searchMode === "ai") {
       const response = await fetch("/api/ai-search", {
@@ -196,6 +218,14 @@ export default function Home() {
         </div>
         <RecentSearches searches={recentSearches} onSelect={handleSearch} />
         <SearchResults results={results} query={query} aiAnswer={aiAnswer} />
+
+        <button
+          type="button"
+          onClick={testEmbedding}
+          className="rounded bg-blue-500 px-4 py-2 text-white"
+        >
+          Test Embedding
+        </button>
       </div>
     </main>
   );

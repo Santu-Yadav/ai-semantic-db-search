@@ -18,8 +18,7 @@ export default function SearchResults({
         <p className="mb-4 text-sm text-gray-500">AI answer for "{query}"</p>
 
         <article className="rounded-lg border border-gray-200 bg-white p-5">
-          {/* <p className="text-sm text-gray-700">{aiAnswer}</p> */}
-          <ReactMarkdown>ReactMarkdown</ReactMarkdown>
+          <ReactMarkdown>{aiAnswer}</ReactMarkdown>
         </article>
       </section>
     );
