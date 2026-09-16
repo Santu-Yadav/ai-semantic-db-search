@@ -19,6 +19,21 @@ export default function Home() {
   const [searchMode, setSearchMode] = useState<SearchMode>("traditional");
   const [aiAnswer, setAiAnswer] = useState("");
 
+  function cosineSimilarity(a: number[], b: number[]): number {
+    let dotProduct = 0;
+    let magnitudeA = 0;
+    let magnitudeB = 0;
+
+    for (let i = 0; i < a.length; i++) {
+      dotProduct += a[i] * b[i];
+
+      magnitudeA += a[i] * a[i];
+      magnitudeB += b[i] * b[i];
+    }
+
+    return dotProduct / (Math.sqrt(magnitudeA) * Math.sqrt(magnitudeB));
+  }
+
   async function testEmbedding() {
     const texts = [
       "React is a JavaScript library for building user interfaces.",
@@ -35,7 +50,21 @@ export default function Home() {
     });
 
     const data = await response.json();
+    //*************************************************************************************/
 
+    const embeddings = data.embeddings;
+
+    const similarityAB = cosineSimilarity(embeddings[0], embeddings[1]);
+
+    const similarityAC = cosineSimilarity(embeddings[0], embeddings[2]);
+
+    const similarityBC = cosineSimilarity(embeddings[1], embeddings[2]);
+
+    console.log("A ↔ B:", similarityAB);
+    console.log("A ↔ C:", similarityAC);
+    console.log("B ↔ C:", similarityBC);
+
+    //************************************************************************************ */
     console.log("Embedding response:", data);
     console.log("Number of embeddings:", data.embeddings.length);
     console.log("Dimensions:", data.embeddings[0].length);
