@@ -19,6 +19,16 @@ export default function Home() {
   const [searchMode, setSearchMode] = useState<SearchMode>("traditional");
   const [aiAnswer, setAiAnswer] = useState("");
 
+  async function testIngest() {
+    const response = await fetch("/api/ingest", {
+      method: "POST",
+    });
+
+    const data = await response.json();
+
+    console.log("Ingest response:", data);
+  }
+
   function cosineSimilarity(a: number[], b: number[]): number {
     let dotProduct = 0;
     let magnitudeA = 0;
@@ -254,6 +264,14 @@ export default function Home() {
           className="rounded bg-blue-500 px-4 py-2 text-white"
         >
           Test Embedding
+        </button>
+
+        <button
+          type="button"
+          onClick={testIngest}
+          className="rounded bg-blue-500 px-4 py-2 text-white"
+        >
+          Test Ingest
         </button>
       </div>
     </main>
