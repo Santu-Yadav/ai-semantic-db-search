@@ -20,9 +20,13 @@ export async function POST() {
     },
   });
 
+  // console.log(" response @@@@@@ :", response);
+
   const embeddings = (response.embeddings ?? []).map(
     (embedding) => embedding.values ?? [],
   );
+
+  // console.log(" embeddings @@@@@@ :", embeddings);
 
   for (let i = 0; i < chunks.length; i++) {
     const chunk = chunks[i];
