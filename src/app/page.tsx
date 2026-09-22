@@ -19,6 +19,22 @@ export default function Home() {
   const [searchMode, setSearchMode] = useState<SearchMode>("traditional");
   const [aiAnswer, setAiAnswer] = useState("");
 
+  async function testVectorSearch() {
+    const response = await fetch("/api/vector-search", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: "How does React manage changing data?",
+      }),
+    });
+
+    const data = await response.json();
+
+    console.log("Vector search response:", data);
+  }
+
   async function testIngest() {
     const response = await fetch("/api/ingest", {
       method: "POST",
@@ -261,7 +277,7 @@ export default function Home() {
         <button
           type="button"
           onClick={testEmbedding}
-          className="rounded bg-blue-500 px-4 py-2 text-white"
+          className="rounded bg-blue-600 px-4 py-2 text-white"
         >
           Test Embedding
         </button>
@@ -269,9 +285,17 @@ export default function Home() {
         <button
           type="button"
           onClick={testIngest}
-          className="rounded bg-blue-500 px-4 py-2 text-white"
+          className="rounded bg-blue-300 px-4 py-2 text-yellow"
         >
           Test Ingest
+        </button>
+
+        <button
+          type="button"
+          onClick={testVectorSearch}
+          className="rounded bg-blue-100 px-4 py-2 text-black"
+        >
+          Test Vector Search
         </button>
       </div>
     </main>
