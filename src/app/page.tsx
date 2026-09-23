@@ -19,6 +19,22 @@ export default function Home() {
   const [searchMode, setSearchMode] = useState<SearchMode>("traditional");
   const [aiAnswer, setAiAnswer] = useState("");
 
+  async function testRagSearch() {
+    const response = await fetch("/api/rag-search", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: "How does React manage changing data?",
+      }),
+    });
+
+    const data = await response.json();
+
+    console.log("RAG response:", data);
+  }
+
   async function testVectorSearch() {
     const response = await fetch("/api/vector-search", {
       method: "POST",
@@ -98,7 +114,7 @@ export default function Home() {
 
   async function handleSearch(searchQuery: string) {
     if (searchMode === "ai") {
-      const response = await fetch("/api/ai-search", {
+      const response = await fetch("/api/rag-search", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -265,11 +281,11 @@ export default function Home() {
             onClear={handleClear}
           />
 
-          <SearchSuggestions
+          {/* <SearchSuggestions
             suggestions={suggestions}
             activeIndex={activeSuggestionIndex}
             onSelect={handleSearch}
-          />
+          /> */}
         </div>
         <RecentSearches searches={recentSearches} onSelect={handleSearch} />
         <SearchResults results={results} query={query} aiAnswer={aiAnswer} />
@@ -296,6 +312,14 @@ export default function Home() {
           className="rounded bg-blue-100 px-4 py-2 text-black"
         >
           Test Vector Search
+        </button>
+
+        <button
+          type="button"
+          onClick={testRagSearch}
+          className="rounded bg-blue-500 px-4 py-2 text-white"
+        >
+          Test RAG Search
         </button>
       </div>
     </main>

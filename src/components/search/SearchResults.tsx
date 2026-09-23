@@ -23,6 +23,7 @@ export default function SearchResults({
       </section>
     );
   }
+
   if (!query.trim()) {
     return null;
   }
