@@ -3,24 +3,43 @@ export function chunkText(
   chunkSize: number,
   overlap: number,
 ): string[] {
+  const sentences = text.match(/[^.!?]+[.!?]+/g) ?? [];
+
   const chunks: string[] = [];
+  let currentChunk = "";
 
-  let start = 0;
+  for (const sentence of sentences) {
+    const trimmedSentence = sentence.trim();
 
-  while (start < text.length) {
-    const end = start + chunkSize;
+    if (
+      currentChunk &&
+      currentChunk.length + trimmedSentence.length + 1 > chunkSize
+    ) {
+      chunks.push(currentChunk.trim());
 
-    chunks.push(text.slice(start, end));
+      const words = currentChunk.trim().split(/\s+/);
 
-    start += chunkSize - overlap;
+      let overlapText = "";
+
+      for (let i = words.length - 1; i >= 0; i--) {
+        const candidate = `${words[i]} ${overlapText}`.trim();
+
+        if (candidate.length > overlap) {
+          break;
+        }
+
+        overlapText = candidate;
+      }
+
+      currentChunk = `${overlapText} ${trimmedSentence}`.trim();
+    } else {
+      currentChunk += `${trimmedSentence} `;
+    }
+  }
+
+  if (currentChunk.trim()) {
+    chunks.push(currentChunk.trim());
   }
 
   return chunks;
 }
-
-const text =
-  "React is a JavaScript library for building user interfaces. React components are reusable pieces of UI.";
-
-const chunks = chunkText(text, 50, 10);
-
-console.log(chunks);
