@@ -13,8 +13,43 @@ const prisma = new PrismaClient({
   adapter,
 });
 
-const content =
-  "React is a JavaScript library for building user interfaces. React components are reusable pieces of UI that can accept data through props. React state allows components to store and manage data that can change over time.";
+const content = `
+React is a JavaScript library for building user interfaces.
+
+React components are reusable pieces of UI that can accept data through props.
+
+React state allows components to store and manage data that can change over time.
+
+React props are inputs passed from a parent component to a child component.
+
+React Hooks are functions that let components use features such as state and effects.
+
+The useState Hook allows a React component to create and update state.
+
+The useEffect Hook allows React components to perform side effects after rendering.
+
+The useMemo Hook memoizes a calculated value so that the calculation can be reused between renders.
+
+The useCallback Hook memoizes a function so that the same function reference can be reused between renders.
+
+React.memo can prevent a component from re-rendering when its props have not changed.
+
+React Context allows components to access shared data without passing props through every level of the component tree.
+
+React event handling allows components to respond to user interactions such as clicks, typing, and form submissions.
+
+Conditional rendering in React allows components to display different UI based on application state or other conditions.
+
+React lists are commonly rendered by using the map function to transform an array into a collection of elements.
+
+React keys help React identify items in a list and determine which items have changed, been added, or been removed.
+
+React rendering is the process of React calculating what the user interface should look like based on the current component state and props.
+
+React reconciliation is the process React uses to compare the previous UI representation with the new one and determine necessary updates.
+
+The Virtual DOM is an in-memory representation of the UI that React uses when determining updates to the actual DOM.
+`.trim();
 
 // const chunks = [
 //   {
