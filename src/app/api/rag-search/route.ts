@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { prisma } from "@/lib/prisma";
+import { hybridSearch } from "@/lib/hybrid-search";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -14,46 +14,48 @@ export async function POST(request: Request) {
     }
 
     // 1. Generate embedding for the user's query
-    const embeddingResponse = await ai.models.embedContent({
-      model: "gemini-embedding-001",
-      contents: query,
-      config: {
-        taskType: "SEMANTIC_SIMILARITY",
-      },
-    });
+    // const embeddingResponse = await ai.models.embedContent({
+    //   model: "gemini-embedding-001",
+    //   contents: query,
+    //   config: {
+    //     taskType: "SEMANTIC_SIMILARITY",
+    //   },
+    // });
 
-    const queryEmbedding = embeddingResponse.embeddings?.[0]?.values;
+    // const queryEmbedding = embeddingResponse.embeddings?.[0]?.values;
 
-    if (!queryEmbedding || queryEmbedding.length !== 3072) {
-      return Response.json(
-        { error: "Failed to generate query embedding" },
-        { status: 500 },
-      );
-    }
+    // if (!queryEmbedding || queryEmbedding.length !== 3072) {
+    //   return Response.json(
+    //     { error: "Failed to generate query embedding" },
+    //     { status: 500 },
+    //   );
+    // }
 
-    const vector = `[${queryEmbedding.join(",")}]`;
+    // const vector = `[${queryEmbedding.join(",")}]`;
 
     // 2. Retrieve the most relevant chunks
-    const chunks = await prisma.$queryRaw<
-      {
-        id: string;
-        content: string;
-        chunkIndex: number;
-        documentId: string;
-        distance: number;
-      }[]
-    >`
-    SELECT
-      "id",
-      "content",
-      "chunkIndex",
-      "documentId",
-      "embedding" <=> ${vector}::vector AS distance
-    FROM "Chunk"
-    WHERE "embedding" IS NOT NULL
-    ORDER BY "embedding" <=> ${vector}::vector
-    LIMIT 5
-  `;
+    //   const chunks = await prisma.$queryRaw<
+    //     {
+    //       id: string;
+    //       content: string;
+    //       chunkIndex: number;
+    //       documentId: string;
+    //       distance: number;
+    //     }[]
+    //   >`
+    //   SELECT
+    //     "id",
+    //     "content",
+    //     "chunkIndex",
+    //     "documentId",
+    //     "embedding" <=> ${vector}::vector AS distance
+    //   FROM "Chunk"
+    //   WHERE "embedding" IS NOT NULL
+    //   ORDER BY "embedding" <=> ${vector}::vector
+    //   LIMIT 5
+    // `;
+
+    const chunks = await hybridSearch(query);
 
     // 3. Build context from retrieved chunks
     const context = chunks.map((chunk) => chunk.content).join("\n\n");
