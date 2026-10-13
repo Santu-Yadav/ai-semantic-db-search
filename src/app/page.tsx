@@ -26,7 +26,7 @@ export default function Home() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        query: "How does React manage changing data?",
+        query: "What is the difference between useMemo and useCallback?",
       }),
     });
 

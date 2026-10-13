@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { hybridSearch } from "@/lib/hybrid-search";
+import { rerankChunks } from "@/lib/rerank-chunks";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -12,53 +13,15 @@ export async function POST(request: Request) {
     if (!query || typeof query !== "string") {
       return Response.json({ error: "Query is required" }, { status: 400 });
     }
-
-    // 1. Generate embedding for the user's query
-    // const embeddingResponse = await ai.models.embedContent({
-    //   model: "gemini-embedding-001",
-    //   contents: query,
-    //   config: {
-    //     taskType: "SEMANTIC_SIMILARITY",
-    //   },
-    // });
-
-    // const queryEmbedding = embeddingResponse.embeddings?.[0]?.values;
-
-    // if (!queryEmbedding || queryEmbedding.length !== 3072) {
-    //   return Response.json(
-    //     { error: "Failed to generate query embedding" },
-    //     { status: 500 },
-    //   );
-    // }
-
-    // const vector = `[${queryEmbedding.join(",")}]`;
-
-    // 2. Retrieve the most relevant chunks
-    //   const chunks = await prisma.$queryRaw<
-    //     {
-    //       id: string;
-    //       content: string;
-    //       chunkIndex: number;
-    //       documentId: string;
-    //       distance: number;
-    //     }[]
-    //   >`
-    //   SELECT
-    //     "id",
-    //     "content",
-    //     "chunkIndex",
-    //     "documentId",
-    //     "embedding" <=> ${vector}::vector AS distance
-    //   FROM "Chunk"
-    //   WHERE "embedding" IS NOT NULL
-    //   ORDER BY "embedding" <=> ${vector}::vector
-    //   LIMIT 5
-    // `;
-
+    
+    // 1. Retrieve candidate chunks using hybrid search
     const chunks = await hybridSearch(query);
+   
+    // 2. Re-rank candidates by relevance to the query
+    const rerankedChunks = await rerankChunks(query, chunks);
 
     // 3. Build context from retrieved chunks
-    const context = chunks.map((chunk) => chunk.content).join("\n\n");
+    const context = rerankedChunks.map((chunk) => chunk.content).join("\n\n");
 
     // 4. Ask Gemini to answer using the retrieved context
     const prompt = `
@@ -86,7 +49,7 @@ Instructions:
     return Response.json({
       query,
       answer,
-      sources: chunks,
+      sources: rerankedChunks,
     });
   } catch (error) {
     console.error("RAG search error:", error);
