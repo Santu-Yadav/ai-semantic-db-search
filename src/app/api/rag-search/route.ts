@@ -24,20 +24,39 @@ export async function POST(request: Request) {
     const context = rerankedChunks.map((chunk) => chunk.content).join("\n\n");
 
     // 4. Ask Gemini to answer using the retrieved context
-    const prompt = `
-You are answering a user's question using the provided context.
+     
+const prompt = `
+You are a question-answering assistant. Answer the user's question
+using only the information provided in the context.
 
 Context:
+<context>
 ${context}
+</context>
 
 Question:
+<question>
 ${query}
+</question>
 
-Instructions:
-- Answer the question using the context.
-- Do not invent information that is not supported by the context.
-- If the context does not contain enough information, say that you do not have enough information.
+Rules:
+1. Use only facts explicitly supported by the context.
+2. Do not use outside knowledge, assumptions, or invented details.
+3. If the context fully answers the question, provide a clear and
+   direct answer.
+4. If the context answers only part of the question, answer that
+   part and clearly state what information is missing.
+5. If the context does not contain relevant information, say:
+   "I don't have enough information in the provided context to
+   answer this question."
+6. If the context contains conflicting information, acknowledge
+   the conflict instead of choosing an unsupported answer.
+7. Do not claim that you verified something unless the context
+   supports that claim.
+
+Answer naturally and concisely.
 `;
+
 
     const generationResponse = await ai.models.generateContent({
       model: "gemini-3.6-flash",
